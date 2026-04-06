@@ -301,3 +301,138 @@ WHERE payType = 'Cash';
 SELECT fName, lName, phoneNumber
 FROM guest
 WHERE isCreditCardValid = 0;
+-- ================================================
+-- Advanced Queries to Expand SQL for GitHub
+-- ================================================
+
+-- 21. Guests who spent more than the average totalAmount
+SELECT g.fName, g.lName, r.totalAmount
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+WHERE r.totalAmount > (SELECT AVG(totalAmount) FROM reservation);
+
+-- 22. Employee with the most reservations handled
+SELECT e.fName, e.lName, COUNT(r.resID) AS reservations_handled
+FROM employee e
+JOIN reservation r ON e.employeeID = r.employeeID
+GROUP BY e.employeeID, e.fName, e.lName
+ORDER BY reservations_handled DESC
+LIMIT 1;
+
+-- 23. Departments with total revenue from services
+SELECT d.depName, SUM(s.cost) AS department_revenue
+FROM department d
+JOIN services s ON d.depID = s.depID
+GROUP BY d.depID, d.depName
+HAVING SUM(s.cost) > 100;
+
+-- 24. Rooms and total number of guests who stayed in them
+SELECT r.roomNumber, COUNT(rsv.resID) AS guests_count
+FROM rooms r
+LEFT JOIN reservation rsv ON r.roomID = rsv.resID
+GROUP BY r.roomID, r.roomNumber;
+
+-- 25. Top 3 most expensive services
+SELECT service_name, cost
+FROM services
+ORDER BY cost DESC
+LIMIT 3;
+
+-- 26. Guests who stayed multiple times in the same month
+SELECT g.fName, g.lName, MONTH(r.checkInDate) AS month, COUNT(r.resID) AS stays
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+GROUP BY g.guestID, MONTH(r.checkInDate)
+HAVING COUNT(r.resID) > 1;
+
+-- 27. Average age of employees per department
+SELECT d.depName, AVG(e.age) AS avg_age
+FROM employee e
+JOIN department d ON e.deptID = d.depID
+GROUP BY d.depID, d.depName;
+
+-- 28. Guests with longest stay (checkOutDate - checkInDate)
+SELECT g.fName, g.lName, DATEDIFF(day, r.checkInDate, r.checkOutDate) AS stay_duration
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+ORDER BY stay_duration DESC
+LIMIT 5;
+
+-- 29. Services linked to guests via reservations
+SELECT g.fName, g.lName, s.service_name, s.cost
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+JOIN services s ON s.resID = r.resID
+ORDER BY g.lName, s.cost DESC;
+
+-- 30. Rooms not assigned in any reservation
+SELECT r.roomNumber, rt.riName
+FROM rooms r
+JOIN room_type rt ON r.roomType = rt.roomTypeID
+WHERE r.roomID NOT IN (SELECT resID FROM reservation);
+
+-- 31. Departments with highest average service cost
+SELECT depID, AVG(cost) AS avg_cost
+FROM services
+GROUP BY depID
+ORDER BY avg_cost DESC
+LIMIT 1;
+
+-- 32. Guests whose first name starts with 'A' and stayed more than once
+SELECT g.fName, g.lName, COUNT(r.resID) AS total_stays
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+WHERE g.fName LIKE 'A%'
+GROUP BY g.guestID, g.fName, g.lName
+HAVING COUNT(r.resID) > 1;
+
+-- 33. Total revenue grouped by payment type
+SELECT payType, SUM(totalAmount) AS total_revenue
+FROM reservation
+GROUP BY payType;
+
+-- 34. Services costing more than average service
+SELECT service_name, cost
+FROM services
+WHERE cost > (SELECT AVG(cost) FROM services);
+
+-- 35. Guests and the total number of services they used
+SELECT g.fName, g.lName, COUNT(s.serID) AS total_services
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+JOIN services s ON s.resID = r.resID
+GROUP BY g.guestID, g.fName, g.lName
+ORDER BY total_services DESC;
+
+-- 36. Departments with most services provided
+SELECT d.depName, COUNT(s.serID) AS service_count
+FROM department d
+JOIN services s ON d.depID = s.depID
+GROUP BY d.depID, d.depName
+ORDER BY service_count DESC;
+
+-- 37. Guests and their longest service cost
+SELECT g.fName, g.lName, MAX(s.cost) AS max_service_cost
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+JOIN services s ON s.resID = r.resID
+GROUP BY g.guestID, g.fName, g.lName;
+
+-- 38. Employees with youngest and oldest age per department
+SELECT depID, MIN(age) AS youngest, MAX(age) AS oldest
+FROM employee
+GROUP BY depID;
+
+-- 39. Total revenue per guest from services
+SELECT g.fName, g.lName, SUM(s.cost) AS total_spent
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+JOIN services s ON s.resID = r.resID
+GROUP BY g.guestID, g.fName, g.lName;
+
+-- 40. Guests who stayed in multiple rooms
+SELECT g.fName, g.lName, COUNT(DISTINCT r.roomID) AS room_count
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+GROUP BY g.guestID, g.fName, g.lName
+HAVING COUNT(DISTINCT r.roomID) > 1;
