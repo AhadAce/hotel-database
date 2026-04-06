@@ -188,3 +188,116 @@ GROUP BY resID;
 SELECT r.roomNumber, rt.riName, rt.smokingFriendly, rt.costK
 FROM rooms r
 JOIN room_type rt ON r.roomType = rt.roomTypeID;
+-- ================================================
+-- Extra queries to expand SQL file for GitHub
+-- ================================================
+
+-- 1. Count total employees in each department
+SELECT d.depName, COUNT(e.employee_id) AS total_employees
+FROM employee e
+JOIN department d ON e.deptID = d.depID
+GROUP BY d.depName;
+
+-- 2. List guests with valid credit cards
+SELECT fName, lName, phoneNumber
+FROM guest
+WHERE isCreditCardValid = 1;
+
+-- 3. Show total revenue per reservation
+SELECT resID, SUM(cost) AS services_total
+FROM services
+GROUP BY resID;
+
+-- 4. Rooms with type, smoking info, and cost
+SELECT r.roomNumber, rt.riName, rt.smokingFriendly, rt.costK
+FROM rooms r
+JOIN room_type rt ON r.roomType = rt.roomTypeID;
+
+-- 5. Employees over 30 years old
+SELECT fName, lName, age
+FROM employee
+WHERE age > 30
+ORDER BY age DESC;
+
+-- 6. Guests older than 25 with their reservation count
+SELECT g.fName, g.lName, COUNT(r.resID) AS reservations_count
+FROM guest g
+LEFT JOIN reservation r ON g.guestID = r.guestID
+GROUP BY g.guestID, g.fName, g.lName
+HAVING COUNT(r.resID) > 0;
+
+-- 7. Average cost of services per department
+SELECT depID, AVG(cost) AS avg_service_cost
+FROM services
+GROUP BY depID;
+
+-- 8. Total revenue per department
+SELECT depID, SUM(cost) AS total_service_revenue
+FROM services
+GROUP BY depID;
+
+-- 9. Employees with their department names
+SELECT e.fName, e.lName, d.depName
+FROM employee e
+JOIN department d ON e.deptID = d.depID
+ORDER BY d.depName;
+
+-- 10. Reservations with totalAmount greater than 100
+SELECT resID, totalAmount, payType, checkInDate, checkOutDate
+FROM reservation
+WHERE totalAmount > 100
+ORDER BY totalAmount DESC;
+
+-- 11. Guests who have stayed multiple times
+SELECT g.fName, g.lName, COUNT(r.resID) AS stay_count
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+GROUP BY g.guestID, g.fName, g.lName
+HAVING COUNT(r.resID) > 1;
+
+-- 12. Rooms that are not booked yet
+SELECT r.roomNumber, r.roomType
+FROM rooms r
+WHERE r.roomID NOT IN (SELECT DISTINCT resID FROM reservation);
+
+-- 13. List services with their department names
+SELECT s.service_name, s.cost, d.depName
+FROM services s
+JOIN department d ON s.depID = d.depID
+ORDER BY s.cost DESC;
+
+-- 14. Guests who stayed in July 2023
+SELECT g.fName, g.lName, r.checkInDate, r.checkOutDate
+FROM guest g
+JOIN reservation r ON g.guestID = r.guestID
+WHERE MONTH(r.checkInDate) = 7 AND YEAR(r.checkInDate) = 2023;
+
+-- 15. Most expensive service per department
+SELECT depID, service_name, MAX(cost) AS max_cost
+FROM services
+GROUP BY depID, service_name;
+
+-- 16. Employees with email addresses ending with 'domain.com'
+SELECT fName, lName, email
+FROM employee
+WHERE email LIKE '%domain.com';
+
+-- 17. Count of guests by gender
+SELECT gender, COUNT(*) AS total
+FROM guest
+GROUP BY gender;
+
+-- 18. Room count by room type
+SELECT roomType, COUNT(*) AS total_rooms
+FROM rooms
+GROUP BY roomType;
+
+-- 19. Reservations with payment type 'Cash'
+SELECT *
+FROM reservation
+WHERE payType = 'Cash';
+
+-- 20. Guests with invalid credit cards
+SELECT fName, lName, phoneNumber
+FROM guest
+WHERE isCreditCardValid = 0;
